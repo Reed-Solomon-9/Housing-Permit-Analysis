@@ -54,6 +54,34 @@ metro_division VARCHAR(50)
 
 COPY codes_all_counties_2023 FROM '/Users/reedw.solomon/Data_Folder/Redfin Housing Data/codes_all_csba_counties_2023_vintage.csv' DELIMITER ',' CSV HEADER;
 
+--Clean region names to match with US Census data
+UPDATE national_housing_data_table
+SET region_name = REPLACE(region_name, 'City County', 'city')
+WHERE region_name LIKE '%City County%';
+UPDATE national_housing_data_table
+SET region_name = REPLACE(region_name, 'Charles city', 'Charles City County')
+WHERE region_name LIKE '%Charles city%';
+UPDATE national_housing_data_table
+SET region_name = REPLACE(region_name, 'James city', 'James City County')
+WHERE region_name LIKE '%James city%';
+
+UPDATE national_housing_data_table
+SET region_name = REPLACE(region_name, ', VA', ' city, VA')
+WHERE region_name LIKE '%, VA%' AND region_type_id = '5' AND region_name NOT LIKE '%County%';
+
+UPDATE national_housing_data_table
+SET region_name = REPLACE(region_name, '&', 'and')
+WHERE region_name LIKE '%King &%' OR region_name LIKE '%Lewis &%';
+
+UPDATE national_housing_data_table
+SET region_name = REPLACE(region_name, 'Borough', 'Municipality')
+WHERE region_name LIKE '%Anchorage%';
+
+UPDATE national_housing_data_table
+SET region_name = REPLACE(region_name, 'Borough', 'City and Borough')
+WHERE region_name LIKE '%Juneau%';
+
+
 --Codes added to national housing table by joining on county name (after cleaning table to ensure names match and resolving all mismatches)
 DROP TABLE IF EXISTS national_housing_data_table_2;
 CREATE TABLE national_housing_data_table_2 AS (
@@ -90,29 +118,8 @@ WHERE region_name LIKE '%Ana County, NM%';
 
 DELETE FROM national_housing_data_table_2 WHERE region_name IS NULL AND county_code = '35013';
 
---Clean region names to match with US Census data
-UPDATE national_housing_data_table
---SET region_name = REPLACE(region_name, 'City County', 'city')
---SET region_name = REPLACE(region_name, 'Charles city', 'Charles City County')
-SET region_name = REPLACE(region_name, 'James city', 'James City County');
 
-UPDATE national_housing_data_table
-SET region_name = REPLACE(region_name, ', VA', ' city, VA')
-WHERE region_name LIKE '%, VA%' AND region_type_id = '5' AND region_name NOT LIKE '%County%';
-
-UPDATE national_housing_data_table
-SET region_name = REPLACE(region_name, '&', 'and')
-WHERE region_name LIKE '%King &%' OR region_name LIKE '%Lewis &%';
-
-UPDATE national_housing_data_table
-SET region_name = REPLACE(region_name, 'Borough', 'Municipality')
-WHERE region_name LIKE '%Anchorage%';
-
-UPDATE national_housing_data_table
-SET region_name = REPLACE(region_name, 'Borough', 'City and Borough')
-WHERE region_name LIKE '%Juneau%';
-
---Homes sold per month and ppsf, 2017-2024
+--Homes sold per month and ppsf, 2017-2025
 WITH year_extracted AS (
 SELECT 
 	EXTRACT (year FROM period_begin) AS year,
@@ -178,6 +185,6 @@ GROUP BY
 	--cbsa_code,
 	cbsa_or_metro
 	
-HAVING cbsa_or_metro IS NOT NULL
+--HAVING cbsa_or_metro IS NOT NULL
 
 ORDER BY county_code
