@@ -1,3 +1,7 @@
+/*This .sql file contains the full query that converts the raw data from Redfin, as well as a lookup file with codes that I added, into
+the sale price table used in my analysis.
+*/
+
 DROP TABLE IF EXISTS national_housing_data_table;
 CREATE TABLE national_housing_data_table (
 PERIOD_BEGIN TIMESTAMP,	
@@ -166,7 +170,7 @@ SELECT
 	--SUM(ROUND(AVG(adjusted_average_homes_sold) FILTER(WHERE year = 2022) * 52, 0)) OVER(PARTITION BY cbsa_code) AS cbsa_homes_sold_2022,
 	--SUM(ROUND(AVG(adjusted_average_homes_sold) FILTER(WHERE year = 2023) * 52, 0)) OVER(PARTITION BY cbsa_code) AS cbsa_homes_sold_2023,
 	--SUM(ROUND(AVG(adjusted_average_homes_sold) FILTER(WHERE year = 2024) * 52, 0)) OVER(PARTITION BY cbsa_code) AS cbsa_homes_sold_2024,
-	--SUM(ROUND(AVG(adjusted_average_homes_sold) FILTER(WHERE year = 2025) * 52, 0)) OVER(PARTITION BY cbsa_code) AS cbsa_homes_sold_2025,
+	--SUM(ROUND(AVG(adjusted_average_homes_sold) FILTER(WHERE year = 2025) * 52, 0)) OVER(PARTITION BY cbsa_code) AS cbsa_homes_sold_2025
 	SUM(ROUND(AVG(adjusted_average_homes_sold) FILTER(WHERE year = 2017) * 52, 0)) OVER(PARTITION BY cbsa_or_metro) AS cbsa_div_homes_sold_2017,
 	SUM(ROUND(AVG(adjusted_average_homes_sold) FILTER(WHERE year = 2018) * 52, 0)) OVER(PARTITION BY cbsa_or_metro) AS cbsa_div_homes_sold_2018,
 	SUM(ROUND(AVG(adjusted_average_homes_sold) FILTER(WHERE year = 2019) * 52, 0)) OVER(PARTITION BY cbsa_or_metro) AS cbsa_div_homes_sold_2019,
@@ -182,7 +186,7 @@ FROM year_extracted
 GROUP BY 
 	county_code,
 	region_name,
-	--cbsa_code,
+	--cbsa_code
 	cbsa_or_metro
 	
 --HAVING cbsa_or_metro IS NOT NULL

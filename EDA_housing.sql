@@ -1,3 +1,5 @@
+--This file contains all ad-hoc queries that were run as part of exploratory data analysis for this project.
+
 DROP TABLE IF EXISTS national_housing_data_table;
 CREATE TABLE national_housing_data_table (
 PERIOD_BEGIN TIMESTAMP,	
