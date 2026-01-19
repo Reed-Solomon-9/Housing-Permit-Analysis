@@ -1,0 +1,7 @@
+{"r.lsp.diagnostics": false,
+"r.lsp.linters": {
+    "pipe_consistency_linter": false,
+    "pipe_continuation_linter": false,
+    "object_usage_linter": true,
+    "commas_linter": true
+}}
