@@ -49,7 +49,7 @@ The adjusted R-squared values for the annual splits ranged from .164 in 2020 to 
 Table 2 contains the overall relationship between these metrics and home prices for the entire period between 2018 and 2024. The result shows a statistically signigicant negative relationship between new multifamily units and home sale prices, and a significant positive relationship between population growth and prices. 
 However, the adjusted R-squared value for this cumulative table is quite low, indicating that the effects were distinct between different years.<br><br>
 
-<img width="721" height="501" alt="Table 3" src="https://github.com/user-attachments/assets/519e827f-e60c-44e9-b4be-48c9c27d698e" /><br><br>
+<img width="504" height="350" alt="Table 3" src="https://github.com/user-attachments/assets/519e827f-e60c-44e9-b4be-48c9c27d698e" /><br><br>
 
 Table 3 shows the effects of single family home and multifamily construction on asking rents from 2020 to 2024 (n = 41). Population has a positive effect in all 5 years, statistically significant in 3 of 5. New single family homes have a negative relationship with asking rents in all 5 years, statistically significant in 2 of 5. 
 
