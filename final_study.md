@@ -34,7 +34,36 @@ In the linear regression models, I used scales for each input and output to meas
 For the home sales models, I measured only the metro areas with populations over 500,000 people (measured in 2024) to avoid the result becoming undesirably noisy. I also omitted metro areas in Connecticut because the state reconsituted its county equivalents during the timespan I measured, and Redfin did not have the granularity requred to measure them correctly. My models covered the 128 largest metro areas in the USA.
 
 ## Results
-For each of housing sale prices and rents, I produced a linear model for each individual year as well as for the entire timespan measured. 
+For each of housing sale prices and rents, I produced a linear model for each individual year as well as for the entire timespan measured.<br><br>
+
+<img width="1002" height="501" alt="Table 1" src="https://github.com/user-attachments/assets/764ae98e-91e8-43d4-9e84-ef1d04d069de" /><br><br>
+
+Table 1 shows the effects of single family home and multifamily construction on home prices for each year 2018 through 2024 (n = 128). Population has a positive effect for all years, statistically significant in all but 1. 
+New single family homes had a negative relationship with home prices in all but one year in the dataset, statisitically significant in 3 of 7 years. 
+Multifamily units had a negative relationship with home prices in all but 2 years in the dataset, and all 5 of the negative relationships were statistically significant.
+
+The adjusted R-squared values for the annual splits ranged from .164 in 2020 to .619 in 2022.<br><br> 
+
+<img width="242" height="350" alt="Table 2" src="https://github.com/user-attachments/assets/8df77115-5e28-4480-b0e9-8f1e4b83490e" /><br>
+
+Table 2 contains the overall relationship between these metrics and home prices for the entire period between 2018 and 2024. The result shows a statistically signigicant negative relationship between new multifamily units and home sale prices, and a significant positive relationship between population growth and prices. 
+However, the adjusted R-squared value for this cumulative table is quite low, indicating that the effects were distinct between different years.<br><br>
+
+<img width="721" height="501" alt="Table 3" src="https://github.com/user-attachments/assets/519e827f-e60c-44e9-b4be-48c9c27d698e" /><br><br>
+
+Table 3 shows the effects of single family home and multifamily construction on asking rents from 2020 to 2024 (n = 41). Population has a positive effect in all 5 years, statistically significant in 3 of 5. New single family homes have a negative relationship with asking rents in all 5 years, statistically significant in 2 of 5. 
+
+New multifamily units had a mixed relationship with asking rents in this study. 3 of the years showed a statistically insignificant effect, while there was a significant negative relationship in 2020 and a significant positive relationship in 2024. <br><br>
+
+<img width="242" height="350" alt="Table 4" src="https://github.com/user-attachments/assets/9380c525-9168-476d-b436-809bcc2796ec" /><br><br>
+
+Table 4 shows the effect of these three metrics on asking rents over the entire timespan from 2020 to 2024. Unintuitive results such as a reversed effect from population growth, as well as an adjusted R-squared of .025, suggest that there are effects between years that are drowning out what I attempted to measure.
+
+
+
+
+
+
 
 
 
