@@ -8,6 +8,10 @@ library(modelsummary)
 library(webshot2)
 library(readr)
 library(fixest)
+library(here)
+library(ggplot2)
+
+source(here("Regression_Models", "model_support.R"))
 
 gs4_auth()
 
@@ -17,7 +21,7 @@ sheet_url <- "https://docs.google.com/spreadsheets/d/1iMcNK9optOYsxhKkWHpMaFekGg
 sales_df_14_25 <- read_sheet(
                                sheet_url,
                                sheet = "Final Table: Sales",
-                               range = "A2:O1154") %>%
+                               range = "A2:P1154") %>%
 
   clean_names() %>%
 
@@ -27,14 +31,14 @@ sales_df_14_25 <- read_sheet(
     !is.na(pop_yoy)
   ) %>%
 
-  mutate(
-  sales_df_14_25, net_migration = percent_net_dom_migration + percent_net_intl_migration
+  mutate(.,
+   net_migration = percent_net_dom_migration + percent_net_intl_migration
   )
    
 expanded_sales_df_14_25 <- read_sheet(
                                sheet_url,
                                sheet = "Final Table: Sales Expanded",
-                               range = "A2:M8423") %>%
+                               range = "A2:P8423") %>%
 
   clean_names() %>%
 
@@ -46,7 +50,7 @@ expanded_sales_df_14_25 <- read_sheet(
 rents_df_19_25 <- read_sheet(
                                sheet_url,
                                sheet = "Final Table: Rents",
-                               range = "A2:O289") %>%
+                               range = "A2:P289") %>%
 
   clean_names() %>%
 
@@ -58,58 +62,6 @@ rents_df_19_25 <- read_sheet(
   mutate(., 
     net_migration = percent_net_dom_migration + percent_net_intl_migration
   )
-
-
-# Name coefficients for model variables
-named_coefs <- c(
-  "scale(units_per_1000)" = "New Housing Units",
-  "scale(sfh_per_1000)" = "New Single Family Homes",
-  "scale(mf_units_per_1000)" = "New Multifamily Units",
-  "scale(pop_yoy)" = "Population Growth",
-  "scale(percent_net_dom_migration)" = "Domestic Migration",
-  "scale(percent_net_intl_migration)" = "International Migration",
-  "scale(net_migration)" = "Net Migration",
-  "scale(yoy_mortgage_rate_change)" = "Change in Mortgage Rate",
-
-  "std_sfh_per_1000" = "New Single Family Homes",
-  "std_sfh_squared" = "New Single Family Homes Squared",
-  "std_mf_units_per_1000" = "New Multifamily Units",
-  "std_mf_squared" = "New Multifamily Units Squared",
-  "std_pop_yoy" = "Population Growth",
-  "std_yoy_mortgage_rate_change" = "Change in Mortgage Rate"
-)  
-
-# Get standard deviations for important columns for each of the three tables
-
-# For Sales table:
-sd_sales_price <- sd(sales_df_14_25$yoy_ppsf, na.rm = TRUE)
-sd_sales_all_units <- sd(sales_df_14_25$units_per_1000, na.rm = TRUE)
-sd_sales_sfh_units <- sd(sales_df_14_25$sfh_per_1000, na.rm = TRUE)
-sd_sales_mf_units <- sd(sales_df_14_25$mf_units_per_1000, na.rm = TRUE)
-sd_sales_pop_change <- sd(sales_df_14_25$pop_yoy, na.rm = TRUE)
-sd_sales_dom_mig <- sd(sales_df_14_25$percent_net_dom_migration, na.rm = TRUE)
-sd_sales_intl_mig <- sd(sales_df_14_25$percent_net_intl_migration, na.rm = TRUE)
-sd_sales_mortgage <- sd(sales_df_14_25$net_migration, na.rm = TRUE)
-
-# For Rents table:
-sd_rents_price <- sd(rents_df_19_25$yoy_ppsf, na.rm = TRUE)
-sd_rents_all_units <- sd(rents_df_19_25$units_per_1000, na.rm = TRUE)
-sd_rents_sfh_units <- sd(rents_df_19_25$sfh_per_1000, na.rm = TRUE)
-sd_rents_mf_units <- sd(rents_df_19_25$mf_units_per_1000, na.rm = TRUE)
-sd_rents_pop_change <- sd(rents_df_19_25$pop_yoy, na.rm = TRUE)
-sd_rents_dom_mig <- sd(rents_df_19_25$percent_net_dom_migration, na.rm = TRUE)
-sd_rents_intl_mig <- sd(rents_df_19_25$percent_net_intl_migration, na.rm = TRUE)
-sd_rents_mortgage <- sd(rents_df_19_25$net_migration, na.rm = TRUE)
-
-# For Expanded Sales table:
-sd_exp_sales_price <- sd(expanded_sales_df_14_25$yoy_ppsf, na.rm = TRUE)
-sd_exp_sales_all_units <- sd(expanded_sales_df_14_25$units_per_1000, na.rm = TRUE)
-sd_exp_sales_sfh_units <- sd(expanded_sales_df_14_25$sfh_per_1000, na.rm = TRUE)
-sd_exp_sales_mf_units <- sd(expanded_sales_df_14_25$mf_units_per_1000, na.rm = TRUE)
-sd_exp_sales_pop_change <- sd(expanded_sales_df_14_25$pop_yoy, na.rm = TRUE)
-sd_exp_sales_dom_mig <- sd(expanded_sales_df_14_25$percent_net_dom_migration, na.rm = TRUE)
-sd_exp_sales_intl_mig <- sd(expanded_sales_df_14_25$percent_net_intl_migration, na.rm = TRUE)
-sd_exp_sales_mortgage <- sd(expanded_sales_df_14_25$net_migration, na.rm = TRUE)
 
 ## Regression Models
 
@@ -157,9 +109,45 @@ modelsummary(
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_2.tex"
 )
 
-coefs_2 <- coef(reg_result_table_2)
+# Translate standardized coefficients back into raw values
+raw_table_2 <- unstandardize_model(reg_result_table_2, sales_df_14_25)
 
+modelsummary(
+  raw_table_2,
+  vcov = function(x) attr(x, "vcov"),
+  stars = TRUE,
+  coef_map = named_coefs,
+  gof_omit = "IC|Log|F",
+  title = "Percent Change In Sale Price Per Square Foot, All Homes",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_2_raw_values.tex"
+)
 
+plot2 <- modelplot(raw_table_2, coef_map = named_coefs) +
+  geom_vline(xintercept = 0, linetype = "dotted", color = "black", size = 0.8) +
+  labs(title = "Estimated Impact on Housing Prices",
+       subtitle = "Percentage Point Change In Price Per SqFt",
+       x = "Effect Size (with 95% Confidence Interval)",
+       y = ""
+       ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold"),
+    legend.position = "right"
+  ) +
+  scale_x_continuous(
+    limits = c(-3, 5), 
+    breaks = seq(-3, 5, by = 1),
+  )
+
+ggsave(
+  filename = here("Regression_Models", "price_forest_plot.png"),
+  plot = plot2,             
+  width = 8,            
+  height = 3.5,         
+  dpi = 300,          
+  bg = "white"      
+)
 
 # 11: YOY Sale price change by 2-years-ago SFH and Multifamily building permits, 
 # and population growth. This model includes metro areas with a 2024 population of 100,000 or greater.
@@ -209,11 +197,8 @@ modelsummary(
 )
 
 # 4: Simple regression with only total housing units and net migration
-mutated_t1 <- mutate(
-  sales_df_14_25, net_migration = percent_net_dom_migration + percent_net_intl_migration
-  )
 
-reg_result_table_4 <- mutated_t1 %>%
+reg_result_table_4 <- sales_df_14_25 %>%
   split(.$year) %>%
   purrr::map(
     ~ lm(
@@ -232,10 +217,9 @@ modelsummary(
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_4.tex"
 )
 
-
 # 9: Regression with SFH and Multifamily Housing and total net migration
 
-reg_result_table_9 <- mutated_t1 %>%
+reg_result_table_9 <- sales_df_14_25 %>%
   split(.$year) %>%
   purrr::map(
     ~ lm(
@@ -258,7 +242,7 @@ modelsummary(
 # TOTALS 1: Regression for the total effect for the period from 2015 to 2023,
 # rather than grouped by year.
 
-reg_result_table_total_1 <- mutated_t1 %>%
+reg_result_table_total_1 <- sales_df_14_25 %>%
   lm(
     scale(yoy_ppsf) ~
     scale(sfh_per_1000) +
@@ -275,6 +259,8 @@ modelsummary(
   title = "Yearly Change In Price Per Square Foot, 2018-2024",
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_total_1.tex"
 )
+
+unstandardize_model(reg_result_table_total_1, sales_df_14_25)
 
 # 5: Regression measuring effect of population and new building permits on 
 # asking rents for 2-bedroom apartments, 2019-2025
@@ -353,9 +339,7 @@ modelsummary(
 
 # 8: Simplified rents model - effect on rents of total units permitted 2 years ago and net migration
 
-mutated_t2 <- 
-
-reg_result_table_8 <- mutated_t2 %>%
+reg_result_table_8 <- rents_df_19_25 %>%
   split(.$year) %>%
   purrr::map(
     ~ lm(
@@ -377,7 +361,7 @@ modelsummary(
 # 10: Rents model with both SFH and Multifamily permits included,
 # as well as net migration
 
-reg_result_table_10 <- mutated_t2 %>%
+reg_result_table_10 <- rents_df_19_25 %>%
   split(.$year) %>%
   purrr::map(
     ~ lm(
@@ -397,10 +381,9 @@ modelsummary(
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_10.tex"
 )
 
-
 # TOTALS 2: Asking Rents over full timespan
 
-reg_result_table_total_2 <- mutated_t2 %>%
+reg_result_table_total_2 <- rents_df_19_25 %>%
   lm(
     scale(yoy_rent) ~
     scale(sfh_per_1000) +
@@ -481,4 +464,36 @@ modelsummary(
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_total_4.tex"
 )
 
+# 12: Model replacing percent change in price per square foot with dollar amount
 
+reg_result_table_12 <- sales_df_14_25 %>%
+  split(.$year) %>%
+  purrr::map(
+    ~ lm(
+      scale(yoy_ppsf_dollars) ~
+      scale(sfh_per_1000) +
+      scale(mf_units_per_1000) +
+      scale(pop_yoy), data = .x
+    )
+  )
+
+modelsummary(
+  reg_result_table_12,
+  stars = TRUE,
+  coef_map = named_coefs,
+  title = "Change In Sale Price Per Square Foot, All Homes",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_12.tex"
+)
+
+# Translate standardized coefficients back into raw values
+raw_table_12 <- unstandardize_model(reg_result_table_12, sales_df_14_25)
+
+modelsummary(
+  raw_table_12,
+  vcov = function(x) attr(x, "vcov"),
+  stars = TRUE,
+  coef_map = named_coefs,
+  gof_omit = "IC|Log|F",
+  title = "Change In Sale Price Per Square Foot, All Homes",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_12_raw_values.tex"
+)
