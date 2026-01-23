@@ -1,9 +1,14 @@
-# Analysis of Relationship between New Housing Permits and Prices Nationwide
+# Home Prices Rise Slower In Markets That Build Housing
 
-## Summary
 This study incorporates permit and population data from the US Census Bureau, as well as real estate price data from Redfin, to attempt to establish a statistical relationship between housing construction and prices. The study covers 128 metro areas over the years 2017 through 2024 for sale prices, and 41 large-cap metro areas from 2020 through 2024 for rents. 
 
-My results show a statistically significant effect of the number of building permits issued two years prior on home prices in most years studied, as well as for the entire timespan, and with a particularly strong negative effect from 2022 through 2024 and a positive effect in 2021. The effect of new building permits on rents was less clear, perhaps due to sample size issues, but the overall effect of new housing on rents was moderately negative. The effects were calculated using a standard multivariate linear regression model.
+My results show a statistically significant effect of the number of building permits issued two years prior on home prices in most years studied, as well as for the entire timespan, and with a particularly strong negative effect from 2022 through 2024 and a positive effect in 2021. The effect of both single family and multifamily homebuilding can be seen in this forest plot:
+
+<img width="2400" height="1050" alt="price_forest_plot" src="https://github.com/user-attachments/assets/29ef4566-6cdd-40ac-9ab3-cc4bc4f6493b" />
+
+
+
+The effect of new building permits on rents was less clear, perhaps due to sample size issues, but the overall effect of new housing on rents was moderately negative. The effects were calculated using a standard multivariate linear regression model.
 
 ## Data 
 This analysis uses the following data:
@@ -11,8 +16,8 @@ This analysis uses the following data:
   The links marked with an "a" before the file extension pertain to full years.
 - Population data for every county in the United States that is in a CBSA from 2016 through 2024. The data was sourced from the US Census Bureau on [this page](https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/totals/) for the years 2016 through 2019 (with intercensal population totals from the last link on [this page](https://www2.census.gov/programs-surveys/popest/tables/2010-2020/intercensal/county/), and the first link on [this page](https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/metro/totals/) for 2020 through 2024.
   
-- Housing market data from Redfin.  Redfin, the large online brokerage, generously makes highly complete data publicly available for home sales nationwide, and also features a table with asking rents in large multifamily buildings in 41 major metropolitan areas. The Redfin home sales table includes data from 1828 out of 1844 counties in the 2023 Vintage CBSA- missing only five counties from Mississippi (2 CBSAs), one county in Hawai'i with a population estimate of 81 people, and the ten parishes that make up the Baton Rouge, Louisiana CBSA. These areas are home to roughly 95% of the USA population. The home sales dataset can be found on [this page](https://www.redfin.com/news/data-center/) (the description says there are 43 metro areas in the dataset but there are 41 that actually have asking rent prices).<br>
-<br>The rents dataset has data on asking rents for apartments of various sizes in buildings with 25 or more units, from March 2019 through August 2025. I downloaded the rent data as a crosstab from [this page.](https://www.redfin.com/news/data-center/rental-market-data/)
+- Housing market data from Redfin.  Redfin, the large online brokerage, generously makes highly complete data publicly available for home sales nationwide, and also features a table with asking rents in large multifamily buildings in 41 major metropolitan areas. The Redfin home sales table includes data from 1828 out of 1844 counties in the 2023 Vintage CBSA. These areas are home to roughly 95% of the USA population. The home sales dataset can be found on [this page](https://www.redfin.com/news/data-center/) .<br>
+<br>The rents dataset has data on asking rents for apartments of various sizes in buildings with 25 or more units, from March 2019 through August 2025. The metro areas in the rents data are organized by the CBSA 2013 vintage. I downloaded the rent data as a crosstab from [this page.](https://www.redfin.com/news/data-center/rental-market-data/)
 
 - Mortgage rate data from Freddie Mac. For the models where years were not split, I included the change in 30-year mortgage rate. This data from FRED, Federal Reserve Bank of St. Louis can be found [here.](https://fred.stlouisfed.org/series/MORTGAGE30US#notes)
 
@@ -34,7 +39,7 @@ Single family and multifamily home construction were separated because they affe
 I measured prices as the year-over-year changes in price per square foot for home sales, and the year-over-year change in 2-bedroom asking rent for rents.
 In the linear regression models, I used standardized coefficients for each input and output to measure how the relative change in each input, measured in standard deviations, affected the output. 
 
-For the home sales models, I measured only the metro areas with populations over 500,000 people (measured in 2024) to avoid the result becoming undesirably noisy. I also omitted metro areas in Connecticut because the state reconstituted its county equivalents during the timespan I measured, and Redfin did not have the granularity requred to measure them correctly. My models covered the 128 largest metro areas in the USA.
+For the home sales models, I measured only the metro areas with populations over 500,000 people (measured in 2024) to avoid the result becoming undesirably noisy. My models covered the 128 largest metro areas in the USA.
 
 ## Results
 For each of housing sale prices and rents, I produced a linear model for each individual year as well as for the entire timespan measured.<br><br>
@@ -75,3 +80,8 @@ That said, there is enough information, particularly in the home sale market, to
 Though they appear to explain a significant amount of variation, population and new housing are not the only things that explain housing costs. Data on changes in income by metro area would be useful to include, as well as information about the share of jobs that can be done remotely.
 
 Although the consensus among economists is that it has a minimal effect, I would also like to measure who owns the housing stock in various metro areas- how many homes are owned by large investment companies vs. individuals. I would also like to know how prices affect future population changes and migration. 
+
+## Data Limitations
+
+The data available from Redfin allowed for a comprehensive look at home prices during the specified time period. However, the dataset was missing five counties from Mississippi (2 CBSAs), one county in Hawai'i with a population estimate of 81 people, and the ten parishes that make up the Baton Rouge, Louisiana CBSA. I also had to omit all metro areas in Connecticut, as the state reconstituted its county equivalents during the timespan I measured, and Redfin did not have the granularity requred to measure them correctly. 
+The rents dataset was described as featuring asking rents data for 43 US metro areas, but two of them did not contain any rent information.
