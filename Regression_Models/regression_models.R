@@ -132,6 +132,8 @@ plot2 <- modelplot(raw_table_2, coef_map = named_coefs) +
   theme_minimal(base_size = 12) +
   theme(
     panel.grid.minor = element_blank(),
+    plot.subtitle = element_text(margin = margin(b = 15)),
+    axis.title.x = element_text(margin = margin(t = 15), hjust = 0),
     plot.title = element_text(face = "bold"),
     legend.position = "right"
   ) +
@@ -144,7 +146,7 @@ ggsave(
   filename = here("Regression_Models", "price_forest_plot.png"),
   plot = plot2,             
   width = 8,            
-  height = 3.5,         
+  height = 5,         
   dpi = 300,          
   bg = "white"      
 )
