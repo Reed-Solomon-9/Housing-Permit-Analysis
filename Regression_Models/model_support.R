@@ -5,11 +5,6 @@
 
 # Name coefficients for model variables
 named_coefs <- c(
-  "yoy_ppsf" = "Yearly Percent Change In Price Per Square Foot",
-  "yoy_ppsf_dollars" = "Yearly Change In Price Per Square Foot, Dollars",
-  "net_migration" = "Net Migration",
-  "units_per_1000" = "New Housing Units",
-  "pop_yoy" = "Population Growth",
   "scale(units_per_1000)" = "New Housing Units",
   "scale(sfh_per_1000)" = "New Single Family Homes",
   "scale(mf_units_per_1000)" = "New Multifamily Units",
@@ -24,7 +19,13 @@ named_coefs <- c(
   "std_mf_units_per_1000" = "New Multifamily Units",
   "std_mf_squared" = "New Multifamily Units Squared",
   "std_pop_yoy" = "Population Growth",
-  "std_yoy_mortgage_rate_change" = "Change in Mortgage Rate"
+  "std_yoy_mortgage_rate_change" = "Change in Mortgage Rate",
+
+  "yoy_ppsf" = "Yearly Percent Change In Price Per Square Foot",
+  "yoy_ppsf_dollars" = "Yearly Change In Price Per Square Foot, Dollars",
+  "net_migration" = "Net Migration",
+  "units_per_1000" = "New Housing Units",
+  "pop_yoy" = "Population Growth"
 )  
 
 # Function to translate model results expressed as standard deviations back into raw numbers for interpretability
@@ -76,11 +77,13 @@ unstandardize_model <- function(mod_std, raw_data) {
         if (clean_name %in% c("sfh_per_1000", "mf_units_per_1000", "units_per_1000")) {
           mod_raw$coefficients[term] <- mod_raw$coefficients[term] * 100
           v_cov[term, term] <- v_cov[term, term] * (100^2)
+          message(paste("Multiplying", term, "into percentage points"))
         }         
       }
       else if (clean_name %in% c("pop_yoy", "percent_net_dom_migration", "percent_net_intl_migration", "net_migration", "yoy_mortgage_rate_change")) {
             mod_raw$coefficients[term] <- mod_raw$coefficients[term] / 100
             v_cov[term, term] <- v_cov[term, term] / (100^2)
+            message(paste("Dividing", term, "into percentages"))
       }
       message(paste("Term:", term, "| Ratio:", round(ratio, 4)))
       message(paste("   Old Var:", old_var, "-> New Var:", v_cov[term, term]))
