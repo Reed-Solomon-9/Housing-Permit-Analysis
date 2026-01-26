@@ -10,6 +10,7 @@ library(readr)
 library(fixest)
 library(here)
 library(ggplot2)
+library(scales)
 
 source(here("Regression_Models", "model_support.R"))
 
@@ -63,10 +64,26 @@ rents_df_19_25 <- read_sheet(
     net_migration = percent_net_dom_migration + percent_net_intl_migration
   )
 
+rents_all_sizes_df_19_25 <- read_sheet(
+                               sheet_url,
+                               sheet = "Final Table: Rents All Sizes",
+                               range = "A2:R289") %>%
+
+  clean_names() %>%
+
+  filter(.,
+    !is.na(yoy_rent),
+    !is.na(pop_yoy)
+  ) %>%
+
+  mutate(., 
+    net_migration = percent_net_dom_migration + percent_net_intl_migration
+  ) 
+
 ## Regression Models
 
 # 1: regression with YOY Price Per Square Foot as Y value
-# and new units permitted/100 people and YOY population change as X variables.
+# and new units permitted/1000 people and YOY population change as X variables.
 
 reg_result_table_1 <- sales_df_14_25 %>%
   split(.$year) %>%
@@ -86,6 +103,7 @@ modelsummary(
   title = "Multivariate Results by Year",
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_1.tex"
 )
+
 
 # 2: YOY Sale price change by 2-years-ago SFH and Multifamily building permits, 
 # and population growth.
@@ -125,10 +143,11 @@ modelsummary(
 plot2 <- modelplot(raw_table_2, coef_map = named_coefs) +
   geom_vline(xintercept = 0, linetype = "dotted", color = "black", size = 0.8) +
   labs(title = "Estimated Impact on Housing Prices",
-       subtitle = "Percentage Point Change In Price Per SqFt",
+       subtitle = "Percentage Point Change In Price Per Square Foot",
        x = "Effect Size (with 95% Confidence Interval)",
        y = ""
        ) +
+  scale_color_manual(values = year_colors) +
   theme_minimal(base_size = 12) +
   theme(
     panel.grid.minor = element_blank(),
@@ -140,6 +159,7 @@ plot2 <- modelplot(raw_table_2, coef_map = named_coefs) +
   scale_x_continuous(
     limits = c(-3, 5), 
     breaks = seq(-3, 5, by = 1),
+    labels = label_number(suffix = "%")
   )
 
 ggsave(
@@ -206,7 +226,7 @@ reg_result_table_4 <- sales_df_14_25 %>%
     ~ lm(
       scale(yoy_ppsf) ~
       scale(units_per_1000) +
-      scale(net_migration),
+      scale(pop_yoy),
       data = .x
     )
   )
@@ -217,6 +237,19 @@ modelsummary(
   stars = TRUE,
   title = "Change In Sale Price Per Square Foot, All Homes",
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_4.tex"
+)
+
+
+raw_table_4 <- unstandardize_model(reg_result_table_4, sales_df_14_25)
+
+modelsummary(
+  raw_table_4,
+  vcov = function(x) attr(x, "vcov"),
+  stars = TRUE,
+  coef_map = named_coefs,
+  gof_omit = "IC|Log|F",
+  title = "Percent Change In Sale Price Per Square Foot, All Homes",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_4_raw_values.tex"
 )
 
 # 9: Regression with SFH and Multifamily Housing and total net migration
@@ -241,7 +274,7 @@ modelsummary(
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_9.tex"
 )
 
-# TOTALS 1: Regression for the total effect for the period from 2015 to 2023,
+# TOTALS 1: Regression for the total effect for the period from 2018 to 2024,
 # rather than grouped by year.
 
 reg_result_table_total_1 <- sales_df_14_25 %>%
@@ -262,7 +295,17 @@ modelsummary(
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_total_1.tex"
 )
 
-unstandardize_model(reg_result_table_total_1, sales_df_14_25)
+raw_totals_table_1 <- unstandardize_model(reg_result_table_total_1, sales_df_14_25)
+
+modelsummary(
+  raw_totals_table_1,
+  vcov = function(x) attr(x, "vcov"),
+  stars = TRUE,
+  coef_map = named_coefs,
+  gof_omit = "IC|Log|F",
+  title = "Yearly Change In Price Per Square Foot, 2018-2024",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_total_1_raw_values.tex"
+)
 
 # 5: Regression measuring effect of population and new building permits on 
 # asking rents for 2-bedroom apartments, 2019-2025
@@ -282,12 +325,54 @@ modelsummary(
   reg_result_table_5,
   coef_map = named_coefs,
   stars = TRUE,
-  title = "Change In Asking Rents For 2-Bedroom Apartments",
+  title = "Percent Change In Asking Rents For 2-Bedroom Apartments",
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_5.tex"
 )
 
-# 6: Population replaced with net migration (The author posits
-# that migration may affect rents more than births/deaths)
+raw_table_5 <- unstandardize_model(reg_result_table_5, rents_df_19_25)
+
+modelsummary(
+  raw_table_5,
+  vcov = function(x) attr(x, "vcov"),
+  stars = TRUE,
+  coef_map = named_coefs,
+  gof_omit = "IC|Log|F",
+  title = "Percent Change In Asking Rents For 2-Bedroom Apartments",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_5_raw_values.tex"
+)
+
+plot5 <- modelplot(raw_table_5, coef_map = named_coefs) +
+  geom_vline(xintercept = 0, linetype = "dotted", color = "black", size = 0.8) +
+  labs(title = "Estimated Impact on 2-Bedroom Asking Rents",
+       subtitle = "Percentage Point Change In Asking Rent",
+       x = "Effect Size (with 95% Confidence Interval)",
+       y = ""
+       ) +
+  scale_color_manual(values = year_colors) +     
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.minor = element_blank(),
+    plot.subtitle = element_text(margin = margin(b = 15)),
+    axis.title.x = element_text(margin = margin(t = 15), hjust = 0),
+    plot.title = element_text(face = "bold"),
+    legend.position = "right"
+  ) +
+  scale_x_continuous(
+    limits = c(-3, 5), 
+    breaks = seq(-3, 5, by = 1),
+    labels = label_number(suffix = "%")
+  )
+
+ggsave(
+  filename = here("Regression_Models", "rent_forest_plot.png"),
+  plot = plot5,             
+  width = 8,            
+  height = 5,         
+  dpi = 300,          
+  bg = "white"      
+)
+
+# 6: Population replaced with net migration
 reg_result_table_6 <- rents_df_19_25 %>%
   split(.$year) %>%
   purrr::map(
@@ -420,7 +505,7 @@ mutate(
     scale(yoy_ppsf) ~
     scale(sfh_per_1000) +
     scale(mf_units_per_1000) +
-    scale(net_migration) +
+    scale(pop_yoy) +
     scale(yoy_mortgage_rate_change),
     data = .
   )
@@ -431,6 +516,18 @@ modelsummary(
   coef_map = named_coefs,
   title = "Change In Home Prices, Metro Areas with 10+ New Units Per 1000 Residents, 2018 - 2024",
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_total_3.tex"
+)
+
+raw_table_total_3 <- unstandardize_model(reg_result_table_total_3, sales_df_14_25)
+
+modelsummary(
+  raw_table_total_3,
+  stars = TRUE,
+  vcov = function(x) attr(x, "vcov"),
+  coef_map = named_coefs,
+  gof_omit = "IC|Log|F",
+  title = "Change In Home Prices, Metro Areas with 10+ New Units Per 1000 Residents, 2018 - 2024",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_total_3_raw_values.tex"
 )
 
 # TOTALS 4: Nonlinear model for home prices
@@ -498,4 +595,159 @@ modelsummary(
   gof_omit = "IC|Log|F",
   title = "Change In Sale Price Per Square Foot, All Homes",
   output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_12_raw_values.tex"
+)
+
+# 13: Effect on sales by year of new housing in areas with 10+ new units
+
+reg_result_table_13 <- filter(
+  sales_df_14_25,
+  units_per_1000 > 10,
+  !is.na(yoy_ppsf),
+  !is.na(pop_yoy)
+) %>%
+
+  split(.$year) %>%
+  purrr::map(
+    ~ lm(
+      scale(yoy_ppsf) ~
+      scale(sfh_per_1000) +
+      scale(mf_units_per_1000) +
+      scale(pop_yoy),
+      data = .x
+    )
+  )
+
+modelsummary(
+  reg_result_table_13,
+  stars = TRUE,
+  coef_map = named_coefs,
+  title = "Change In Home Prices, Metro Areas with 10+ New Units Per 1000 Residents, 2018 - 2024",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_13.tex"
+)
+
+raw_table_13 <- unstandardize_model(reg_result_table_13, sales_df_14_25)
+
+modelsummary(
+  raw_table_13,
+  stars = TRUE,
+  vcov = function(x) attr(x, "vcov"),
+  coef_map = named_coefs,
+  gof_omit = "IC|Log|F",
+  title = "Change In Home Prices, Metro Areas with 10+ New Units Per 1000 Residents, 2018 - 2024",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_13_raw_values.tex"
+)
+
+# 14: Effect on sales by year of new housing in areas with 8+ new units
+
+reg_result_table_14 <- filter(
+  sales_df_14_25,
+  units_per_1000 > 8,
+  !is.na(yoy_ppsf),
+  !is.na(pop_yoy)
+) %>%
+
+  split(.$year) %>%
+  purrr::map(
+    ~ lm(
+      scale(yoy_ppsf) ~
+      scale(sfh_per_1000) +
+      scale(mf_units_per_1000) +
+      scale(pop_yoy),
+      data = .x
+    )
+  )
+
+modelsummary(
+  reg_result_table_14,
+  stars = TRUE,
+  coef_map = named_coefs,
+  title = "Change In Home Prices, Metro Areas with 8+ New Units Per 1000 Residents, 2018 - 2024",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_14.tex"
+)
+
+raw_table_14 <- unstandardize_model(reg_result_table_14, sales_df_14_25)
+
+modelsummary(
+  raw_table_14,
+  stars = TRUE,
+  vcov = function(x) attr(x, "vcov"),
+  coef_map = named_coefs,
+  gof_omit = "IC|Log|F",
+  title = "Change In Home Prices, Metro Areas with 8+ New Units Per 1000 Residents, 2018 - 2024",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_14_raw_values.tex"
+)
+
+# TOTALS 5: PPSF over full timespan, only areas with 8+ new units per 1000 people
+
+reg_result_table_total_5 <- filter(
+  sales_df_14_25,
+  units_per_1000 > 8,
+  !is.na(yoy_ppsf),
+  !is.na(pop_yoy)
+) %>%
+
+mutate(
+  net_migration = (percent_net_dom_migration - percent_net_intl_migration)
+) %>%
+
+  lm(
+    scale(yoy_ppsf) ~
+    scale(sfh_per_1000) +
+    scale(mf_units_per_1000) +
+    scale(pop_yoy) +
+    scale(yoy_mortgage_rate_change),
+    data = .
+  )
+
+modelsummary(
+  reg_result_table_total_5,
+  stars = TRUE,
+  coef_map = named_coefs,
+  title = "Change In Home Prices, Metro Areas with 10+ New Units Per 1000 Residents, 2018 - 2024",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_total_5.tex"
+)
+
+raw_table_total_5 <- unstandardize_model(reg_result_table_total_5, sales_df_14_25)
+
+modelsummary(
+  raw_table_total_5,
+  stars = TRUE,
+  vcov = function(x) attr(x, "vcov"),
+  coef_map = named_coefs,
+  gof_omit = "IC|Log|F",
+  title = "Change In Home Prices, Metro Areas with 10+ New Units Per 1000 Residents, 2018 - 2024",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_total_5_raw_values.tex"
+)
+
+# 14 Regression measuring effect of population and new building permits on asking rents for 1-Bedroom apartments 
+
+reg_result_table_14 <- rents_all_sizes_df_19_25 %>%
+  split(.$year) %>%
+  purrr::map(
+    ~ lm(
+      scale(yoy_rent_1b) ~
+      scale(sfh_per_1000) +
+      scale(mf_units_per_1000) +
+      scale(pop_yoy), data = .x
+    )
+  )
+
+modelsummary(
+  reg_result_table_14,
+  coef_map = named_coefs,
+  stars = TRUE,
+  title = "Percent Change In Asking Rents For 1-Bedroom Apartments",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_14.tex"
+)
+
+raw_table_14 <- unstandardize_model(reg_result_table_14, rents_all_sizes_df_19_25)
+
+modelsummary(
+  raw_table_14,
+  vcov = function(x) attr(x, "vcov"),
+  stars = TRUE,
+  coef_map = named_coefs,
+  gof_omit = "IC|Log|F",
+  title = "Percent Change In Asking Rents For 1-Bedroom Apartments",
+  output = "/Users/reedw.solomon/Data_Folder/Redfin Housing Data/Regression Result Tables/LaTex Files/reg_result_table_14_raw_values.tex"
 )

@@ -5,6 +5,7 @@
 
 # Name coefficients for model variables
 named_coefs <- c(
+  "scale(yoy_rent)" = "Yearly Change In Asking Rent",
   "scale(units_per_1000)" = "New Housing Units",
   "scale(sfh_per_1000)" = "New Single Family Homes",
   "scale(mf_units_per_1000)" = "New Multifamily Units",
@@ -23,6 +24,7 @@ named_coefs <- c(
 
   "yoy_ppsf" = "Yearly Percent Change In Price Per Square Foot",
   "yoy_ppsf_dollars" = "Yearly Change In Price Per Square Foot, Dollars",
+  "yoy_rent" = "Yearly Change In Asking Rent",
   "net_migration" = "Net Migration",
   "units_per_1000" = "New Housing Units",
   "pop_yoy" = "Population Growth"
@@ -80,7 +82,7 @@ unstandardize_model <- function(mod_std, raw_data) {
           message(paste("Multiplying", term, "into percentage points"))
         }         
       }
-      else if (clean_name %in% c("pop_yoy", "percent_net_dom_migration", "percent_net_intl_migration", "net_migration", "yoy_mortgage_rate_change")) {
+      else if (clean_name %in% c("pop_yoy", "yoy_rent", "percent_net_dom_migration", "percent_net_intl_migration", "net_migration", "yoy_mortgage_rate_change")) {
             mod_raw$coefficients[term] <- mod_raw$coefficients[term] / 100
             v_cov[term, term] <- v_cov[term, term] / (100^2)
             message(paste("Dividing", term, "into percentages"))
@@ -95,3 +97,15 @@ unstandardize_model <- function(mod_std, raw_data) {
 
   return(mod_raw)
 }
+
+# Colors for consistency across models
+year_colors <- c(
+  "2018" = "#6366F1", # Indigo 
+  "2019" = "#10B981", # Emerald/Green 
+  "2020" = "#F59E0B", # Amber/Orange
+  "2021" = "#06B6D4", # Cyan/Light Blue
+  "2022" = "#3B82F6", # Blue
+  "2023" = "#E11D48", # Rose/Red
+  "2024" = "#D946EF", # Fuchsia/Pink
+  "2025" = "#8B5CF6" # Violet
+  )
