@@ -1,87 +1,48 @@
 # Home Prices Rise Slower In Markets That Build Housing
 
-This study incorporates permit and population data from the US Census Bureau, as well as real estate price data from Redfin, to attempt to establish a statistical relationship between housing construction and prices. The study covers 128 metro areas over the years 2017 through 2024 for sale prices, and 41 large-cap metro areas from 2020 through 2024 for rents. 
+This study analyzes market shifts across a seven-year period (2018–2024) and, controlling for population growth, quantifies how new construction directly moderates price appreciation. The results reveal a trend: in five of the last seven years, the addition of a single multifamily unit per thousand residents correlated with a 1% to 2% nominal decrease in the growth rate of price per square foot.
 
-My results show a statistically significant effect of the number of building permits issued two years prior on home prices in most years studied, as well as for the entire timespan, and with a particularly strong negative effect from 2022 through 2024 and a positive effect in 2021. The effect of both single family and multifamily homebuilding can be seen in this forest plot:
+The analysis also highlights the nuance of housing types and market cycles. While multifamily units showed a consistent cooling effect, the impact of single-family permits was more specialized, reaching statistical significance in three of the seven years studied. The effect of both single family and multifamily housing was reversed in 2021, a unique year where home prices exploded by over 17% nationwide; and when the COVID-19 pandemic, fiscal stimulus, and a period of expansionary monetary policy were likely sources of omitted variable bias.
 
-<img width="2400" height="1050" alt="price_forest_plot" src="https://github.com/user-attachments/assets/29ef4566-6cdd-40ac-9ab3-cc4bc4f6493b" />
+This analysis adds to the growing body of evidence demonstrating that building more new housing is the clear and straightforward solution to the housing affordability problem that has become the single biggest economic issue facing young families, and Americans trying to start families.<br><br>
+
+<img width="2400" height="1050" alt="price_forest_plot" src="https://github.com/user-attachments/assets/878b533b-2597-4596-9422-679897c93e91" /><br><br>
+
+The forest plot above illustrates the effect of new single family homes, multifamily units, and population growth on home prices. This study measures new housing units through building permits issued two years prior. This choice allows for accurate estimates of new housing inventory, and avoids simultaneity bias by using population at the time of permit issuance as the denominator.<br><br>
+
+There is reason to believe that 2021 was a singular year for home prices, and that the positive relationship in this model for that year is a historical anomaly. For example, home prices increased massively nationwide in 2021 compared to other years within the timespan covered by Redfin housing data, for all counties as well as for large metro areas:
+
+<img width="900" height="556" alt="Nationwide Annual Change, Home Price Per Square Foot" src="https://github.com/user-attachments/assets/40c54ee3-c619-4e22-a3ae-a5aa4f7808e7" />
+
+While the "cooling effect" of new construction is most pronounced in home sales, a similar trend persists in the rental market. My analysis of asking rents for two-bedroom apartments reveals a consistent, though more moderate, negative correlation with new multifamily permits.
+
+<img width="2400" height="1050" alt="rent_forest_plot" src="https://github.com/user-attachments/assets/b289d40f-0c3f-4e9b-93ea-07b27424756e" /><br><br>
+
+The model shows a negative relationship between new single family homes and asking rents, though it would benefit from a larger sample, in terms of both years and number of markets (n = 41).
+
+**Data Sources:** Housing market statistics provided by Redfin Data Center. Population and building permit data sourced from the U.S. Census Bureau Population Estimates Program (PEP) and Building Permits Survey (BPS).<br>
 
 
+### Methodology & Technical Implementation Highlights
 
-The effect of new building permits on rents was less clear, perhaps due to sample size issues, but the overall effect of new housing on rents was moderately negative. The effects were calculated using a standard multivariate linear regression model.
+**Data Orchestration**<br>
+SQL (PostgreSQL): Performed high-volume joins between Redfin’s weekly market TSVs and US Census Bureau population datasets. Developed custom cleaning scripts to resolve geographic naming mismatches across different data vintages (2013 vs. 2023).
 
-## Data 
-This analysis uses the following data:
-- Building permit data for every county in a Census Bureau Statistical Area (CBSA) in the United States from from 2015 through 2022. The data can be accessed in CSV form through [this webpage.](https://www2.census.gov/econ/bps/County/)
-  The links marked with an "a" before the file extension pertain to full years.
-- Population data for every county in the United States that is in a CBSA from 2016 through 2024. The data was sourced from the US Census Bureau on [this page](https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/totals/) for the years 2016 through 2019 (with intercensal population totals from the last link on [this page](https://www2.census.gov/programs-surveys/popest/tables/2010-2020/intercensal/county/), and the first link on [this page](https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/metro/totals/) for 2020 through 2024.
-  
-- Housing market data from Redfin.  Redfin, the large online brokerage, generously makes highly complete data publicly available for home sales nationwide, and also features a table with asking rents in large multifamily buildings in 41 major metropolitan areas. The Redfin home sales table includes data from 1828 out of 1844 counties in the 2023 Vintage CBSA. These areas are home to roughly 95% of the USA population. The home sales dataset can be found on [this page](https://www.redfin.com/news/data-center/) .<br>
-<br>The rents dataset has data on asking rents for apartments of various sizes in buildings with 25 or more units, from March 2019 through August 2025. The metro areas in the rents data are organized by the CBSA 2013 vintage. I downloaded the rent data as a crosstab from [this page.](https://www.redfin.com/news/data-center/rental-market-data/)
+Google Sheets: Engineered a functional unpivoting logic using REDUCE and LAMBDA to transform decade-wide Census tables into a relational "long" format for time-series analysis. Applied array and filtering logic to allow for reliable integration of future data.
 
-- Mortgage rate data from Freddie Mac. For the models where years were not split, I included the change in 30-year mortgage rate. This data from FRED, Federal Reserve Bank of St. Louis can be found [here.](https://fred.stlouisfed.org/series/MORTGAGE30US#notes)
+**Econometric Design**<br>
+Endogeneity & Simultaneity: Mitigated simultaneity bias by utilizing lagged independent variables (t-2). This ensures the model captures the supply-side impact of building permits on future prices, rather than current price growth driving immediate permitting activity. 
 
-## Methodology
-The objective of this study was to establish the relationship between new homebuilding and housing prices. There are many factors that determine the price of housing, but I chose to focus on new housing and population changes, representing supply and demand in a basic economic paradigm. As population changes are strongly correlated with home prices, I needed to control for it in order to best isolate the effect of housing supply on price. I ran a few different versions of a linear regression model featuring the following inputs:
-- New housing units permitted per 1000 residents, two years ago
-- New single family homes permitted per 1000 residents, two years ago
-- New multifamily housing units permitted per 1000 residents, two years ago
-- Year-over-year population change
-- year-over-year net domestic migration
-- year-over-year net international migration
-- year-over-year net total migration
-- year-over-year change in 30-year mortgage rate
+Variable Normalization: To ensure comparability across market sizes, all housing permits were scaled to units per 1,000 residents. Conducted robustness checks by splitting the analysis into yearly cross-sections (2018–2024), accounting for time-varying macroeconomic shocks such as interest rate volatility and the 2021 demand spike.
 
-A two-year lag was applied to permit data to account for the average duration between permit issuance and inventory completion. Population serves as an estimation of the total demand for housing.
+Back-Transformation: Used a custom R function to convert standardized Z-score coefficients back into nominal percentage points, ensuring the findings were interpretable for non-technical stakeholders.
 
-Single family and multifamily home construction were separated because they affect the market in different ways. I included net migration as a subsititute for population growth in the rents model because I hypothesize that demand for apartments is more sensitive to migration than to natural population change through births and deaths.
+**Model Integrity**<br>
+Outlier Management: Utilized SQL window functions to identify and remove price-per-square-foot anomalies (5x regional mean) that would have biased the regression slopes.
 
-I measured prices as the year-over-year changes in price per square foot for home sales, and the year-over-year change in 2-bedroom asking rent for rents.
-In the linear regression models, I used standardized coefficients for each input and output to measure how the relative change in each input, measured in standard deviations, affected the output. 
+Significance Testing: Applied the modelsummary and fixest packages in R to generate LaTeX-formatted tables with consistent standard error reporting and significance stars.
 
-For the home sales models, I measured only the metro areas with populations over 500,000 people (measured in 2024) to avoid the result becoming undesirably noisy. My models covered the 128 largest metro areas in the USA.
+**Next Steps**<br>
+U.S. Census population data for 2025 will be released in the coming weeks, and this will allow me to include 2025 in this analysis. As there is negative raw correlation between new homes built two years prior (2023) and 2025 home prices, it is likely that this inclusion will make the overall result more robust. A clearer picture of what causes home prices to change could also be discovered through adding metrics such as income.
 
-## Results
-For each of housing sale prices and rents, I produced a linear model for each individual year as well as for the entire timespan measured.<br><br>
-
-<img width="1002" height="501" alt="Table 1" src="https://github.com/user-attachments/assets/764ae98e-91e8-43d4-9e84-ef1d04d069de" /><br><br>
-
-Table 1 shows the effects of single family home and multifamily construction on home prices for each year 2018 through 2024 (n = 128). Population has a positive effect for all years, statistically significant in all but 1. 
-New single family homes had a negative relationship with home prices in all but one year in the dataset, statistically significant in 3 of 7 years. 
-Multifamily units had a negative relationship with home prices in all but 2 years in the dataset, and all 5 of the negative relationships were statistically significant.
-
-The adjusted R-squared values for the annual splits ranged from .164 in 2020 to .619 in 2022.<br><br> 
-
-<img width="242" height="392" alt="Table 2" src="https://github.com/user-attachments/assets/23295a5e-14d1-40f5-a5f2-da7907661da2" /><br>
-
-Table 2 contains the overall relationship between these metrics and home prices for the entire period between 2018 and 2024. The result shows a statistically signigicant negative relationship between new multifamily units and home sale prices, and a significant positive relationship between population growth and prices. 
-However, the adjusted R-squared value for this cumulative table is quite low, indicating that the effects were distinct between different years.<br><br>
-
-I also isolated the metro area-years where over 10 new homes had been built per 1000 residents, and found a substantial cumulative effect in Table 3:
-
-<img width="242" height="405" alt="Table 3" src="https://github.com/user-attachments/assets/d2a5b773-33fe-4dd8-bef6-db17ae62ddeb" /><br>
-
-The sample size is smaller, but the effect of new housing was pronounced in markets where a significant quantity was built.<br><br>
-
-<img width="504" height="350" alt="Table 4" src="https://github.com/user-attachments/assets/8789cf93-8613-448b-a22c-ae641e509101" /><br><br>
-
-Table 4 shows the effects of single family home and multifamily construction on asking rents from 2020 to 2024 (n = 41). Population has a positive effect in all 5 years, statistically significant in 3 of 5. New single family homes have a negative relationship with asking rents in all 5 years, statistically significant in 2 of 5. 
-
-New multifamily units had a mixed relationship with asking rents in this study. 3 of the years showed a statistically insignificant effect, while there was a significant negative relationship in 2020 and a significant positive relationship in 2024. <br><br>
-
-<img width="242" height="392" alt="Table 5" src="https://github.com/user-attachments/assets/eab3401c-c695-4bbe-bd31-7aefd03200db" /><br><br>
-
-Table 5 shows the effect of these three metrics on asking rents over the entire timespan from 2020 to 2024. Unintuitive results such as a reversed effect from population growth, as well as an adjusted R-squared of .025, suggest that there is significant omitted variable bias, and that prices are influenced by year-specific macroeconomic shocks.
-
-That said, there is enough information, particularly in the home sale market, to say that it is likely that there exists a real relationship between increased new housing construction and lower housing prices. 
-
-## Areas To Study Further
-
-Though they appear to explain a significant amount of variation, population and new housing are not the only things that explain housing costs. Data on changes in income by metro area would be useful to include, as well as information about the share of jobs that can be done remotely.
-
-Although the consensus among economists is that it has a minimal effect, I would also like to measure who owns the housing stock in various metro areas- how many homes are owned by large investment companies vs. individuals. I would also like to know how prices affect future population changes and migration. 
-
-## Data Limitations
-
-The data available from Redfin allowed for a comprehensive look at home prices during the specified time period. However, the dataset was missing five counties from Mississippi (2 CBSAs), one county in Hawai'i with a population estimate of 81 people, and the ten parishes that make up the Baton Rouge, Louisiana CBSA. I also had to omit all metro areas in Connecticut, as the state reconstituted its county equivalents during the timespan I measured, and Redfin did not have the granularity requred to measure them correctly. 
-The rents dataset was described as featuring asking rents data for 43 US metro areas, but two of them did not contain any rent information.
+Full technical documentation and code for this analysis is available in the GitHub [repository](https://github.com/Reed-Solomon-9/Housing-Permit-Analysis), and other relevant data is located in my Google Sheets [workbook](https://docs.google.com/spreadsheets/d/1iMcNK9optOYsxhKkWHpMaFekGg6laP4Bg2kJylIvdTc/edit?gid=588298634#gid=588298634).
