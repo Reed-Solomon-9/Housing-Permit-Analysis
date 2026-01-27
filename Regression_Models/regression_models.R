@@ -163,7 +163,7 @@ plot2 <- modelplot(raw_table_2, coef_map = named_coefs) +
   )
 
 ggsave(
-  filename = here("Regression_Models", "price_forest_plot.png"),
+  filename = here("Visuals", "price_forest_plot.png"),
   plot = plot2,             
   width = 8,            
   height = 5,         
@@ -364,7 +364,7 @@ plot5 <- modelplot(raw_table_5, coef_map = named_coefs) +
   )
 
 ggsave(
-  filename = here("Regression_Models", "rent_forest_plot.png"),
+  filename = here("Visuals", "rent_forest_plot.png"),
   plot = plot5,             
   width = 8,            
   height = 5,         
