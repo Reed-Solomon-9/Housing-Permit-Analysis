@@ -109,3 +109,8 @@ year_colors <- c(
   "2024" = "#D946EF", # Fuchsia/Pink
   "2025" = "#8B5CF6" # Violet
   )
+
+padding_for_thumbnails <- theme(
+  plot.margin = margin(50, 50, 50, 50, "pt"),
+  plot.background = element_rect(fill = "white", color = NA)
+)
