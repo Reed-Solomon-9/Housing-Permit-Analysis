@@ -171,6 +171,16 @@ ggsave(
   bg = "white"      
 )
 
+ggsave(
+  filename = here("Visuals", "price_forest_plot_padded.png"),
+  plot = plot2 + padding_for_thumbnails,             
+  width = 8,            
+  height = 5,         
+  dpi = 300,          
+  bg = "white"      
+)
+
+
 # 11: YOY Sale price change by 2-years-ago SFH and Multifamily building permits, 
 # and population growth. This model includes metro areas with a 2024 population of 100,000 or greater.
 
