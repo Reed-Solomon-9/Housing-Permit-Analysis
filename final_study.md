@@ -1,12 +1,14 @@
-# Home Prices Rise Slower In Markets That Build Housing
+# Home Prices Rise Slower In Markets That Build More Housing
 
-This study analyzes market shifts across a seven-year period (2018–2024) and, controlling for population growth, quantifies how new construction directly moderates price appreciation. The results reveal a trend: in five of the last seven years, the addition of a single multifamily unit per thousand residents correlated with a 1% to 2% nominal decrease in the growth rate of price per square foot.
+###### Updated March 2026 with the release of 2025 US Census Population Estimates
 
-The analysis also highlights the nuance of housing types and market cycles. While multifamily units showed a consistent cooling effect, the impact of single-family permits was more specialized, reaching statistical significance in three of the seven years studied. The effect of both single family and multifamily housing was reversed in 2021, a unique year where home prices exploded by over 17% nationwide; and when the COVID-19 pandemic, fiscal stimulus, and a period of expansionary monetary policy were likely sources of omitted variable bias.
+This study analyzes market shifts across an eight-year period (2018–2025) and, controlling for population growth, quantifies how new construction directly moderates price appreciation. The results reveal a trend: in six of the last eight years, the addition of a single multifamily unit per thousand residents correlated with a 1% to 2% nominal decrease in the growth rate of price per square foot.
 
-This analysis adds to the growing body of evidence demonstrating that building more new housing is the clear and straightforward solution to the housing affordability problem that has become the single biggest economic issue facing young families, and Americans trying to start families.<br><br>
+The analysis also highlights the nuance of housing types and market cycles. While multifamily units showed a consistent cooling effect, the impact of single-family permits was more specialized, reaching statistical significance in four of the eight years studied. The effect of both single family and multifamily housing was reversed in 2021, a unique year where home prices exploded by over 17% nationwide; and when the COVID-19 pandemic, fiscal stimulus, and a period of expansionary monetary policy were likely sources of omitted variable bias.
 
-<img width="2400" height="1050" alt="price_forest_plot" src="https://github.com/user-attachments/assets/878b533b-2597-4596-9422-679897c93e91" /><br><br>
+This analysis adds to the growing body of evidence demonstrating that building more new housing is the clear and straightforward solution to the housing affordability problem that has become the single biggest economic issue facing young families, and Americans trying to become parents.<br><br>
+
+<img width="2400" height="1050" alt="price_forest_plot" src="https://github.com/user-attachments/assets/fcc17336-3bf0-4185-946d-54616acddff5" /><br><br>
 
 The forest plot above illustrates the effect of new single family homes, multifamily units, and population growth on home prices. This study measures new housing units through building permits issued two years prior. This choice allows for accurate estimates of new housing inventory, and avoids simultaneity bias by using population at the time of permit issuance as the denominator.<br><br>
 
@@ -14,7 +16,7 @@ There is reason to believe that 2021 was a singular year for home prices, and th
 
 <img width="900" height="556" alt="Nationwide Annual Change, Home Price Per Square Foot" src="https://github.com/user-attachments/assets/40c54ee3-c619-4e22-a3ae-a5aa4f7808e7" />
 
-While the "cooling effect" of new construction is most pronounced in home sales, a similar trend persists in the rental market. My analysis of asking rents for two-bedroom apartments reveals a consistent, though more moderate, negative correlation with new multifamily permits.
+While the cooling effect of new construction is most pronounced in home sales, a similar trend is present in the rental market. My analysis of asking rents for two-bedroom apartments reveals a consistent, though more moderate, negative correlation with new multifamily permits.
 
 <img width="2400" height="1050" alt="rent_forest_plot" src="https://github.com/user-attachments/assets/b289d40f-0c3f-4e9b-93ea-07b27424756e" /><br><br>
 
@@ -31,9 +33,9 @@ SQL (PostgreSQL): Performed high-volume joins between Redfin’s weekly market T
 Google Sheets: Engineered a functional unpivoting logic using REDUCE and LAMBDA to transform decade-wide Census tables into a relational "long" format for time-series analysis. Applied array and filtering logic to allow for reliable integration of future data.
 
 **Econometric Design**<br>
-Endogeneity & Simultaneity: Mitigated simultaneity bias by utilizing lagged independent variables (t-2). This ensures the model captures the supply-side impact of building permits on future prices, rather than current price growth driving immediate permitting activity. 
+Endogeneity & Simultaneity: Mitigated simultaneity bias by utilizing lagged independent variables (t-2). This accounts for the time needed for homes to actually be completed after they are permitted. Additionally, it ensures that the model captures the supply-side impact of building permits on future prices, rather than current price growth driving immediate permitting activity. 
 
-Variable Normalization: To ensure comparability across market sizes, all housing permits were scaled to units per 1,000 residents. Conducted robustness checks by splitting the analysis into yearly cross-sections (2018–2024), accounting for time-varying macroeconomic shocks such as interest rate volatility and the 2021 demand spike.
+Variable Normalization: To ensure comparability across market sizes, all housing permits were scaled to units per 1,000 residents. Conducted robustness checks by splitting the analysis into yearly cross-sections (2018–2025), accounting for time-varying macroeconomic shocks such as interest rate volatility and the 2021 demand spike.
 
 Back-Transformation: Used a custom R function to convert standardized Z-score coefficients back into nominal percentage points, ensuring the findings were interpretable for non-technical stakeholders.
 
@@ -43,6 +45,6 @@ Outlier Management: Utilized SQL window functions to identify and remove price-p
 Significance Testing: Applied the modelsummary and fixest packages in R to generate LaTeX-formatted tables with consistent standard error reporting and significance stars.
 
 **Next Steps**<br>
-U.S. Census population data for 2025 will be released in the coming weeks, and this will allow me to include 2025 in this analysis. As there is negative raw correlation between new homes built two years prior (2023) and 2025 home prices, it is likely that this inclusion will make the overall result more robust. A clearer picture of what causes home prices to change could also be discovered through adding metrics such as income.
+Data for future years will be released intermittently by the US Census Bureau and Redfin This will allow for a larger body of evidence, and potentially underscore the notion that the 2021 spike was truly an anomaly. A clearer picture of what causes home prices to change could also be discovered through adding metrics such as income.
 
 Code for this analysis is available in the GitHub [repository](https://github.com/Reed-Solomon-9/Housing-Permit-Analysis), and other relevant data is located in my Google Sheets [workbook](https://docs.google.com/spreadsheets/d/1iMcNK9optOYsxhKkWHpMaFekGg6laP4Bg2kJylIvdTc/edit?gid=588298634#gid=588298634).
