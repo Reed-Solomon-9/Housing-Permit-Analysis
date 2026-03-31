@@ -107,7 +107,7 @@ year_colors <- c(
   "2022" = "#3B82F6", # Blue
   "2023" = "#E11D48", # Rose/Red
   "2024" = "#D946EF", # Fuchsia/Pink
-  "2025" = "#8B5CF6" # Violet
+  "2025" = "#684bad" # Violet
   )
 
 padding_for_thumbnails <- theme(
