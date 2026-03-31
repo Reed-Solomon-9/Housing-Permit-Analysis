@@ -8,7 +8,7 @@ The analysis also highlights the nuance of housing types and market cycles. Whil
 
 This analysis adds to the growing body of evidence demonstrating that building more new housing is the clear and straightforward solution to the housing affordability problem that has become the single biggest economic issue facing young families, and Americans trying to become parents.<br><br>
 
-<img width="2400" height="1050" alt="price_forest_plot" src="https://github.com/user-attachments/assets/fcc17336-3bf0-4185-946d-54616acddff5" /><br><br>
+<img width="2400" height="525" alt="price_forest_plot" src="https://github.com/user-attachments/assets/fcc17336-3bf0-4185-946d-54616acddff5" /><br><br>
 
 The forest plot above illustrates the effect of new single family homes, multifamily units, and population growth on home prices. This study measures new housing units through building permits issued two years prior. This choice allows for accurate estimates of new housing inventory, and avoids simultaneity bias by using population at the time of permit issuance as the denominator.<br><br>
 
